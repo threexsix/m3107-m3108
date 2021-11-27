@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 typedef struct TAGS{
     char version[3];
     char ver[2];
@@ -15,8 +14,6 @@ typedef union bytesize{
     char byte[4];
 };
 
-
-
 typedef struct FRAMES{
     char name[4];
     char size[4];
@@ -24,10 +21,8 @@ typedef struct FRAMES{
     char unicode;
 } FRAMES;
 
-
 TAGS tag_header;
 FRAMES frame_header;
-
 
 int string_count(char *str){
     int i = 0;
@@ -36,7 +31,6 @@ int string_count(char *str){
     }
     return i;
 }
-
 
 int synchsafe_to_int(char byte[4])
 {
@@ -57,15 +51,9 @@ char *int_to_synchsafe(int val)
     return byte;
 }
 
-
-
-
 int header_size_to_int(char byte[4]) {
     return byte[0] << 21 | byte[1] << 14 | byte[2] << 7 | byte[3];
 }
-
-
-
 
 int size_of_file(const char *file_name){
 
@@ -103,12 +91,6 @@ void show(char *file_name){
     int file_size = size_of_file(file_name);
     printf("file_size = %d\n", file_size);
 
-
-
-
-
-
-
     while(ftell(file) < tag_size){
 
         fread(&frame_header, 1, 11, file);
@@ -129,7 +111,6 @@ void show(char *file_name){
     fclose(file);
 }
 
-
 void get(char *file_name, char *frame){
 
     FILE *file = fopen(file_name, "rb");
@@ -139,26 +120,29 @@ void get(char *file_name, char *frame){
     printf("%sv%d.%d\n", tag_header.version, tag_header.ver[0], tag_header.ver[1]);
 
     int tag_size = header_size_to_int(tag_header.size);
-    printf("size = %d\n", tag_header.size);
-
+    printf("tag size = %d\n", tag_size);
 
     while(ftell(file) < tag_size){
 
         fread(&frame_header, 1, 11, file);
+        int frame_size = synchsafe_to_int(frame_header.size);
+
         if (strcmp(frame, frame_header.name) == 0){
+
             int frame_size = synchsafe_to_int(frame_header.size);
             char *content = calloc(frame_size, 1);
             fgets(content, frame_size, file);
             printf("id: %5s || size: %5d || value: ", frame_header.name, frame_size);
             printf("%s\n", content);
             free(content);
-            return 1;
+            break;
         }
+
+        fseek(file, frame_size - 1, SEEK_CUR);
 
     }
     fclose(file);
 }
-
 
 void set_value(char *file_name, char *frame, char *value){
 
@@ -166,33 +150,24 @@ void set_value(char *file_name, char *frame, char *value){
     is_correct_file(file);
     int file_size = size_of_file(file_name);
 
-
     fread(&tag_header, 1, 10, file);
     printf("%sv%d.%d  ", tag_header.version, tag_header.ver[0], tag_header.ver[1]);
 
     int tag_size = header_size_to_int(tag_header.size);
     printf("tag size = %d\n", tag_size);
 
-
-
     while(ftell(file) < tag_size){
 
-
         fread(&frame_header, 1, 11, file);
-
 
         if (strcmp(frame, frame_header.name) == 0){
 
             int frame_size = synchsafe_to_int(frame_header.size);
 
-
             int left_ptr = ftell(file) - 7;
             int right_ptr = left_ptr + frame_size + 6;
 
-
-
             int value_size = string_count(value);
-
 
             char *left_buf = calloc(1, left_ptr);
             char *right_buf = calloc(1, file_size - right_ptr);
@@ -207,11 +182,8 @@ void set_value(char *file_name, char *frame, char *value){
 
             fwrite(left_buf, 1, left_ptr, new);
 
-
             union bytesize x;
             x.value = value_size + 1;
-
-
 
             char info_buf[7];
             info_buf[0] = x.byte[3];
@@ -222,14 +194,9 @@ void set_value(char *file_name, char *frame, char *value){
             info_buf[5] = frame_header.flags[1];
             info_buf[6] = frame_header.unicode;
 
-
-
-
             fwrite(info_buf, 1, 7, new);
 
             fwrite(value, 1, value_size, new);
-
-
 
             fwrite(right_buf, 1, file_size - right_ptr, new);
 
@@ -238,12 +205,9 @@ void set_value(char *file_name, char *frame, char *value){
             printf("\n frame was successfully edited \n");
             break;
         }
-
-
     }
     fclose(file);
 }
-
 
 void add_frame(char *file_name, char *frame, char *value){
 
@@ -251,13 +215,11 @@ void add_frame(char *file_name, char *frame, char *value){
     is_correct_file(file);
     int file_size = size_of_file(file_name);
 
-
     fread(&tag_header, 1, 10, file);
     printf("%sv%d.%d\n", tag_header.version, tag_header.ver[0], tag_header.ver[1]);
 
     int tag_size = header_size_to_int(tag_header.size);
     printf("start size = %d\n", tag_size);
-
 
     fseek(file, tag_size, SEEK_SET);
 
@@ -289,9 +251,7 @@ void add_frame(char *file_name, char *frame, char *value){
     fwrite(tag_header.size, 1, 4, new);
     fwrite(left_buf, 1, pos - 10, new);
 
-
     fwrite(frame, 1, 4, new);
-
 
     union bytesize x;
     x.value = string_count(value) + 1;
@@ -311,15 +271,10 @@ void add_frame(char *file_name, char *frame, char *value){
 
     fwrite(right_buf, 1, file_size - pos, new);
 
-
     printf("\n frame was successfully aded");
     fclose(new);
     fclose(file);
 }
-
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -336,7 +291,6 @@ int main(int argc, char *argv[])
         get(name, get_val);
         }
 
-
     else if(argc > 3)
         {
         char *frame = strpbrk(argv[2], "=") + 1;
@@ -345,5 +299,4 @@ int main(int argc, char *argv[])
         }
     return 0;
 }
-
 
