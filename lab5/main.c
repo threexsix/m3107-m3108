@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+void reverse(char s[])
+ {
+     int i, j;
+     char c;
+
+     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+         c = s[i];
+         s[i] = s[j];
+         s[j] = c;
+     }
 
 void itoa(int n, char s[])
  {
@@ -17,16 +28,7 @@ void itoa(int n, char s[])
      s[i] = '\0';
      reverse(s);
  }
-void reverse(char s[])
- {
-     int i, j;
-     char c;
 
-     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
-         c = s[i];
-         s[i] = s[j];
-         s[j] = c;
-     }
  }
 
 int** calculation(int** arr, int height, int width) {
