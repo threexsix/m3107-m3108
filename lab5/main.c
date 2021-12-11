@@ -1,6 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <direct.h>
+
+
+void itoa(int n, char s[])
+ {
+     int i, sign;
+
+     if ((sign = n) < 0)  
+         n = -n;         
+     i = 0;
+     do {       
+         s[i++] = n % 10 + '0';  
+     } while ((n /= 10) > 0);    
+     if (sign < 0)
+         s[i++] = '-';
+     s[i] = '\0';
+     reverse(s);
+ }
+void reverse(char s[])
+ {
+     int i, j;
+     char c;
+
+     for (i = 0, j = strlen(s)-1; i<j; i++, j--) {
+         c = s[i];
+         s[i] = s[j];
+         s[j] = c;
+     }
+ }
 
 int** calculation(int** arr, int height, int width) {
 
@@ -61,7 +88,6 @@ int main(int argc, char* argv[]) {
 
         if (!strcmp("--output", argv[i])) {
             directory = argv[i + 1];
-            mkdir(directory);
         }
         if (!strcmp("--max_iter", argv[i]))
             generations = strtol(argv[i + 1], 0, 10);
@@ -110,7 +136,7 @@ int main(int argc, char* argv[]) {
         char file_name[256], generation_value[10], name[30] = "gen";
         strcpy(file_name, directory);
         strcat(file_name, "\\");
-        _itoa(i, generation_value, 10);
+        itoa(i, generation_value);
         strcat(name, generation_value);
         strcat(name, ".bmp");
         strcat(file_name, name);
@@ -146,3 +172,4 @@ int main(int argc, char* argv[]) {
     return 0;
 
 }
+
