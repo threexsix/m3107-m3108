@@ -25,7 +25,7 @@ void create(int argc, char *argv[], char *archive_name) {
             break;
         }
 
-        unsigned char file_name_length = strlen(argv[i]);
+        unsigned char file_name_length = strlen(argv[i]) + 1;
         if (file_name_length > UCHAR_MAX) {
             printf("file name is too large");
             break;
@@ -112,7 +112,7 @@ void list(char *archive_name) {
         free(file_name);
     }
 
-    printf("total files : %d  ", file_counter);
+    printf("total files : %d  \n", file_counter);
 
     fclose(archive);
 }
@@ -130,3 +130,4 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
