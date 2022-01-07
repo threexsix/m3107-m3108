@@ -25,7 +25,7 @@ int get_time(char *request_time) {
 
     for (int i = 0; i < 12; i++){
         if (strcmp(month, calendar[i])){
-            local_time.tm_mon = i + 1;
+            local_time.tm_mon = i;
             break;
         }
     }
